@@ -1,8 +1,9 @@
-main = do 
-    let a0 = 50
-    let c0 = 65
-    putStrLn $ show $ iter 10 50 50
 
+{-
+n = iterations
+a = amount at airport at time 0
+c = amount at city center at time 0
+-}
 iter :: Int -> Double -> Double -> (Double, Double)
 iter n a c 
     | n == 0 = (a, c)
