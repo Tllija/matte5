@@ -25,9 +25,7 @@ Explanation:
     C(n+1) = A(n) * 0.7 + C(n) * 0.75
     A(0) + C(0) = 105
 
-    This model assumes ns of month chunks, i.e. it is not continous
-    and assumes during a month A has the same amount of cars
-    (that is: car count only changes at the end of the month).
+    This model assumes every car gets rented at both A and C each month.
 
 Which gives that:
 
