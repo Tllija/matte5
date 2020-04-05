@@ -4,7 +4,7 @@ n = iterations
 a = amount at airport at time 0
 c = amount at city center at time 0
 -}
-iter :: Int -> Double -> Double -> (Double, Double)
+iter :: (Integral a, Fractional b) => a -> b -> b -> (b, b)
 iter n a c 
     | n == 0 = (a, c)
     | otherwise = iter (n-1) an cn
