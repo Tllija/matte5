@@ -49,14 +49,14 @@ iter2 n a c
     where 
         cRented = c * cRentPercentage
         aRented = a * aRentPercentage
-        cn = c - cRented * 0.25 + aRented * 0.70
-        an = a - aRented * 0.70 + cRented * 0.25
+        cn = c - cRented * 0.30 + aRented * 0.75
+        an = a - aRented * 0.75 + cRented * 0.30
 
 {-
 Expl.:
 
-    A(n+1) = C(n) - rentPercentageC * C(n) * 0.75 + rentPercentageA * A(n) * 0.7)
-    A(n+1) = A(n) - rentPercentageA * (A(n) * 0.3 + rentPercentageC * C(n) * 0.25)
+    A(n+1) = C(n) - rentPercentageC * C(n) * 0.75 + rentPercentageA * A(n) * 0.75)
+    A(n+1) = A(n) - rentPercentageA * (A(n) * 0.3 + rentPercentageC * C(n) * 0.30)
 
 Result:
 
@@ -64,36 +64,37 @@ Result:
 -}
 
 iter3 :: (Integral a, Fractional b) => a -> -- n
-     b -> (b -> b -> b) ->                  -- a and anRented
-     b -> (b -> b -> b) ->                  -- c and cnRented
+     b -> (b -> a -> b) ->                  -- a and anRented
+     b -> (b -> a -> b) ->                  -- c and cnRented
     (b, b)                                  -- a and c
 iter3 n a ar c cr 
     | n == 0 = (a, c)
     | otherwise = iter3 (n-1) an ar cn cr
     where
-        aCarsRented = ar a c
-        cCarsRented = cr a c
-        an = a - aCarsRented * 0.70 + cCarsRented * 0.25
-        cn = c - cCarsRented * 0.25 + aCarsRented * 0.70
+        aCarsRented = ar a n
+        cCarsRented = cr c n
+        an = a - aCarsRented * 0.75 + cCarsRented * 0.30
+        cn = c - cCarsRented * 0.30 + aCarsRented * 0.75
 
 
 iter3Acc :: (Integral a, Fractional b) => a -> -- n
-     b -> (b -> b -> b) ->                  -- a and anRented
-     b -> (b -> b -> b) ->                  -- c and cnRented
+     b -> (b -> a -> b) ->                  -- a and anRented
+     b -> (b -> a -> b) ->                  -- c and cnRented
     [(b, b)]                                -- a and c
 iter3Acc n a ar c cr 
     | n == 0 = [(a, c)]
     | otherwise = ((an, cn)):(iter3Acc (n-1) an ar cn cr)
     where
-        aCarsRented = ar a c
-        cCarsRented = cr a c
-        an = a - aCarsRented * 0.70 + cCarsRented * 0.25
-        cn = c - cCarsRented * 0.25 + aCarsRented * 0.70
+        aCarsRented = ar a n
+        cCarsRented = cr c n
+        an = a - aCarsRented * 0.75 + cCarsRented * 0.30
+        cn = c - cCarsRented * 0.30 + aCarsRented * 0.75
 
 {-
 Expl.:
 
-    A(n+1) = A(n) - A(n) * 0.70 * F1(A(n), C(n)) + C(n) * 0.25 * F2(A(n), C(n))
-    C(n+1) = C(n) - C(n) * 0.25 * F2(A(n), C(n)) + A(n) * 0.7 * F1(A(n), C(n))
+    A(n+1) = A(n) - A(n) * 0.75 * F1(A(n), n) + C(n) * 0.30 * F2(A(n), n)
+    C(n+1) = C(n) - C(n) * 0.30 * F2(A(n), n) + A(n) * 0.75 * F1(A(n), n)
 
 -}
+
