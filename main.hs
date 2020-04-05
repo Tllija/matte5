@@ -35,3 +35,41 @@ Which gives that:
     In fact, for any A(0) and C(0), as n->infinity
     A(n)/(A(n)+C(n)) ~ 0.26
 -}
+
+
+cRentPercentage :: (Fractional a) => a
+cRentPercentage = 0.5
+aRentPercentage :: (Fractional a) => a
+aRentPercentage = 0.1
+
+iter2 :: (Integral a, Fractional b) => a -> b -> b -> (b, b)
+iter2 n a c 
+    | n == 0 = (a, c)
+    | otherwise = iter2 (n-1) an cn
+    where 
+        cRented = c * cRentPercentage
+        aRented = a * aRentPercentage
+        cn = c - cRented * 0.25 + aRented * 0.70
+        an = a - aRented * 0.70 + cRented * 0.25
+
+{-
+Expl.:
+A(n+1) = C(n) - rentPercentageC * C(n) * 0.75 + rentPercentageA * A(n) * 0.7)
+A(n+1) = A(n) - rentPercentageA * (A(n) * 0.3 + rentPercentageC * C(n) * 0.25)
+
+Result:
+If rentpercentage changes the result at n->infintity
+-}
+
+iter3 :: (Integral a, Fractional b) => a -> -- n
+     b -> (b -> b -> b) ->                  -- a and anRented
+     b -> (b -> b -> b) ->                  -- c and cnRented
+    (b, b)                                  -- a and c
+iter3 n a ar c cr 
+    | n == 0 = (a, c)
+    | otherwise = iter3 (n-1) an ar cn cr
+    where
+        aCarsRented = ar a c
+        cCarsRented = cr a c
+        an = a - aCarsRented * 0.70 + cCarsRented * 0.25
+        cn = c - cCarsRented * 0.25 + aCarsRented * 0.70
