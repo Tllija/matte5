@@ -1,71 +1,16 @@
 
-{-
-n = iterations
-a = amount at airport at time 0
-c = amount at city center at time 0
--}
-iter :: (Integral a, Fractional b) => a -> b -> b -> (b, b)
-iter n a c 
-    | n == 0 = (a, c)
-    | otherwise = iter (n-1) an cn
-    where 
-        cn = c * 0.75 + a * 0.7
-        an = c * 0.25 + a * 0.3
+-- This function calculates the amount of cars at A and C after n months.
+-- It does so via two functions that describe the amount of cars rented
+-- depending on the amount of cars available and the current month n
 
-{-
-Explanation:
-
-    Airport = A
-    City-Center = C
-
-    A revices 30% of C cars every month, as well as it loses 75% of cars from the start of the month.
-    C recvices 70% of C:s cars from the start of the month and loses 25% of its own start-of-the-month cars.
-
-    A(n+1) = A(n) * 0.3 + C(n) * 0.25
-    C(n+1) = A(n) * 0.7 + C(n) * 0.75
-    A(0) + C(0) = 105
-
-    This model assumes every car gets rented at both A and C each month.
-
-Which gives that:
-
-    A(n) ~ 27.3 as n->infinity for any A(0)
-         where A(0) = 105 - C(0)
-    
-    In fact, for any A(0) and C(0), as n->infinity
-    A(n)/(A(n)+C(n)) ~ 0.26
--}
-
-
-cRentPercentage :: (Fractional a) => a
-cRentPercentage = 0.5
-aRentPercentage :: (Fractional a) => a
-aRentPercentage = 0.1
-
-iter2 :: (Integral a, Fractional b) => a -> b -> b -> (b, b)
-iter2 n a c 
-    | n == 0 = (a, c)
-    | otherwise = iter2 (n-1) an cn
-    where 
-        cRented = c * cRentPercentage
-        aRented = a * aRentPercentage
-        cn = c - cRented * 0.30 + aRented * 0.75
-        an = a - aRented * 0.75 + cRented * 0.30
-
-{-
-Expl.:
-
-    A(n+1) = C(n) - rentPercentageC * C(n) * 0.75 + rentPercentageA * A(n) * 0.75)
-    A(n+1) = A(n) - rentPercentageA * (A(n) * 0.3 + rentPercentageC * C(n) * 0.30)
-
-Result:
-
-    If rentpercentage changes the result at n->infintity
--}
-
-iter3 :: (Integral a, Fractional b) => a -> -- n
+-- n = the amount of months
+-- a = cars at A at n = 0
+-- ar = cars rented given A and n (i.e. F(A(n), n))
+-- c = cars at C at n = 0
+-- cr = cars rented given A and n (i.e. F(C(n), n))
+iter3 :: (Integral a, Fractional b) => a -> -- n 
      b -> (b -> a -> b) ->                  -- a and anRented
-     b -> (b -> a -> b) ->                  -- c and cnRented
+     b -> (b -> a -> b) ->                  -- c and cnRented 
     (b, b)                                  -- a and c
 iter3 n a ar c cr 
     | n == 0 = (a, c)
@@ -77,6 +22,7 @@ iter3 n a ar c cr
         cn = c - cCarsRented * 0.30 + aCarsRented * 0.75
 
 
+-- Same as iter3, but this outpus a list so that the change can be viewed
 iter3Acc :: (Integral a, Fractional b) => a -> -- n
      b -> (b -> a -> b) ->                  -- a and anRented
      b -> (b -> a -> b) ->                  -- c and cnRented
@@ -91,10 +37,69 @@ iter3Acc n a ar c cr
         cn = c - cCarsRented * 0.30 + aCarsRented * 0.75
 
 {-
-Expl.:
+Expl. of maths:
 
-    A(n+1) = A(n) - A(n) * 0.75 * F1(A(n), n) + C(n) * 0.30 * F2(A(n), n)
-    C(n+1) = C(n) - C(n) * 0.30 * F2(A(n), n) + A(n) * 0.75 * F1(A(n), n)
+    A(0) + C(0) = 105 
+
+    F1(A(n),n) describes the amount of cars RENTED F1 given the month n and amount of cars A(n)
+    F2(C(n),n) does the same, but for C(n)
+
+    A(n) is the amount of cars at A at month n
+    C(n) is the amount of cars at C at month n
+
+    A(n+1) = A(n) - 0.75 * F1(A(n), n) + 0.30 * F2(C(n), n)
+    C(n+1) = C(n) - 0.30 * F2(C(n), n) + 0.75 * F1(A(n), n)
+
+
+Result:
+    The amount of cars at n doesn not necessarily approach a steady point, for example:
+        If the function that describes the amount of rented cars at A is 
+            F(a, n) = n (mod 12) * 0.05
+        the amount of cars will always fluctuate depending on the time of the year.
 
 -}
+
+
+
+
+-- This functions is if the amount of cars rented is proportional to the amount of cars at either spot.
+-- The proportinality constant is ~~vvvvv
+cRentPercentage :: (Fractional a) => a
+cRentPercentage = 0.5
+aRentPercentage :: (Fractional a) => a
+aRentPercentage = 0.1
+
+-- n is the number of months to be simulated
+-- a is the amount of cars at a at n=0
+-- b is the amount of cars at b at n=0
+iter2 :: (Integral a, Fractional b) => a -> b -> b -> (b, b)
+iter2 n a c 
+    | n == 0 = (a, c)
+    | otherwise = iter2 (n-1) an cn
+    where 
+        cRented = c * cRentPercentage -- Amount of cars rented this month from c
+        aRented = a * aRentPercentage -- Amount of cars rented this month from A
+        cn = c - cRented * 0.30 + aRented * 0.75 -- 70% of A:s are returned and 75% of C:s are also returned here
+        an = a - aRented * 0.75 + cRented * 0.30 -- 25% of C:s are returned and 30% of A:s are also returned here
+
+{-
+Expl. of maths:
+
+    A(0) + C(0) = 105
+    The inital distribution of cars doesn't matter when n -> infinity, s
+    since the amount of cars will approach as certain value.
+
+    C(n+1) = C(n) - rentPercentageC * C(n) * 0.30 + rentPercentageA * A(n) * 0.75)
+    Cars at C at month n
+
+    A(n+1) = A(n) - rentPercentageA * A(n) * 0.75 + rentPercentageC * C(n) * 0.30)
+    Cars at A at month n
+
+Result:
+
+    If rentPercentage changes the result at n->infintity
+    I.E. the amount of cars at approach a different value depending on the rentPercentage
+-}
+
+
 
